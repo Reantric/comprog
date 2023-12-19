@@ -3,6 +3,7 @@
 
 using namespace std;
 typedef long long ll;
+typedef __int128 lll;
 typedef unsigned long long ull;
 typedef vector<int> vi;
 typedef vector<ll> vll;
@@ -35,12 +36,12 @@ int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
 
-/*std::ostream& operator<<(std::ostream& o, const __int128& x) {
+std::ostream& operator<<(std::ostream& o, const __int128& x) {
     if (x == std::numeric_limits<__int128>::min()) return o << "-170141183460469231731687303715884105728";
     if (x < 0) return o << "-" << -x;
     if (x < 10) return o << (char)(x + '0');
     return o << x / 10 << (char)(x % 10 + '0');
-} */
+}
 
 long long binpow(long long a, long long b, ll M = MOD) {
     a %= M;
@@ -357,21 +358,6 @@ struct dsu {
 
 };
 
-
-/* ll spf[(int) 1e5 + 10]; // cler
-void sieve(ll n) {
-    for (int i = 1; i <= n; ++i)
-        spf[i] = i & 1 ? i : 2;
-    for (int i = 3; i * i <= n; ++i) {
-        if (spf[i] == i) {
-            for (int p = i * i; p <= n; p += i) {
-                if (spf[p] == p)
-                    spf[p] = i;
-            }
-        }
-    }
-} */
-
 struct stronglyConnectedComponents {
     int id = 1;
     int scc = 0;
@@ -440,73 +426,42 @@ struct stronglyConnectedComponents {
     }
 };
 
-const int MAXN = (int) 2e5 + 7;
-
-
-void preload() {
-    //sieve((int) 1e5 + 3);
-}
-
-void solve() {
-    ll a,b,c,d;
-    cin >> a >> b >> c >> d;
-    ll g = gcd(c,d);
-    c /= g;
-    d /= g;
-
-    int n = 1+floor(log10(a));
-    for (int mask = 0; mask < (1 << n); ++mask){
-        // choose some values of a to REMOVE
-        // then check if a*d/c is b with the vals from a removed
-        vi freqR(10,0);
-        auto astr = to_string(a);
-        string a1str;
-        for (int i = 0; i < astr.size(); ++i){
-            if ((mask & (1<<i)) == 0) {
-                freqR[astr[i] - '0']++;
-
-            } else
-                a1str += astr[i];
-        }
-        if (a1str.empty())
-            continue;
-        ll a1 = stoll(a1str);
-        if (a1 % c != 0 || a1 == 0 || a1str[0] == '0')
-            continue;
-        if (log10(a1) + log10((d+0.0)/c) > 18)
-            continue;
-        ll x = a1/c * d;
-        // so x is the new b, now we need to remove A's shit
-
-        if (x == 0)
-            continue;
-        //compare x and b
-
-        auto x1 = to_string(x);
-        auto b1 = to_string(b);
-
-        int y = 0;
-        vi freq(10,0);
-        for (int i = 0; i < b1.size(); ++i){
-            if (y < x1.size() && b1[i] == x1[y]){
-                y++;
-                continue;
-            } else
-                freq[b1[i]-'0']++;
-        }
-        bool ok = y == x1.size();
-        for (int i = 0; i < 10; ++i)
-            ok &= freq[i] == freqR[i];
-        ok &= x1[0] != 0;
-        if (ok){
-            print("possible")
-            cout << a1 << " " << x << "\n";
-            return;
+/* ll spf[(int) 1e6 + 10]; // cler
+void sieve(ll n) {
+    for (int i = 1; i <= n; ++i)
+        spf[i] = i & 1 ? i : 2;
+    for (int i = 3; i * i <= n; ++i) {
+        if (spf[i] == i) {
+            for (int p = i * i; p <= n; p += i) {
+                if (spf[p] == p)
+                    spf[p] = i;
+            }
         }
     }
-    print("impossible");
+} */
 
+const int MAXN = (int) 2e5 + 7;
 
+void preload() {
+   // sieve((int) 1e6 + 3);
+}
+
+Mint psum[(int) 1e5 + 3];
+void solve() {
+    int n;
+    cin >> n;
+    ll a[n];
+    for (int i = 0; i < n; ++i)
+        cin >> a[i];
+
+    Mint s = 0;
+    psum[0] = 0;
+    for (int i = 0; i < n; ++i)
+        psum[i+1] = psum[i] + a[i];
+    for (int i = 0; i < n; ++i){
+        s += (psum[n]-psum[i])*a[i];
+    }
+    print((s*binpow(2,n-1,MOD)).x);
 }
 
 
@@ -515,7 +470,7 @@ int main() {
     preload();
     int t;
     t = 1;
-    //cin >> t;
+   // cin >> t;
     while (t-- > 0)
         solve();
     return 0;
