@@ -1,5 +1,5 @@
 int sp[(int) 3e5][30];
-int query(const int* a,int l, int r){
+int query(const vi& a,int l, int r){
     if (r == l)
         return sp[r][0];
     int d = (int) log2(highestPowerof2LessThanOrEq(r-l));

@@ -1,3 +1,5 @@
+//#pragma GCC optimize("O3,unroll-loops")
+//#pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
 #include <bits/stdc++.h>
 #include <algorithm>
 
@@ -7,6 +9,8 @@ typedef __int128 lll;
 typedef unsigned long long ull;
 typedef vector<int> vi;
 typedef vector<ll> vll;
+typedef vector<ull> vull;
+typedef vector<lll> vlll;
 typedef pair<int, int> pi;
 typedef pair<ll, ll> pll;
 const ll INF = LONG_LONG_MAX - 1;
@@ -37,15 +41,15 @@ int sgn(T val) {
 }
 
 std::ostream& operator<<(std::ostream& o, const __int128& x) {
-    if (x == std::numeric_limits<__int128>::min()) return o << "-170141183460469231731687303715884105728";
+    if (x == std::numeric_limits<__int128>::min()) return o << "0"; //170141183460469231731687303715884105728
     if (x < 0) return o << "-" << -x;
     if (x < 10) return o << (char)(x + '0');
     return o << x / 10 << (char)(x % 10 + '0');
 }
 
-long long binpow(long long a, long long b, ll M = MOD) {
+unsigned long long binpow(ull a, ull b, ll M = MOD) {
     a %= M;
-    long long res = 1;
+    ull res = 1;
     while (b > 0) {
         // this is really smart, its basically cycling through all binary digits and if there's a 1 there, multiply res by it!
         if (b & 1) // bit hacky way of checking b % 2 == 1
@@ -56,12 +60,12 @@ long long binpow(long long a, long long b, ll M = MOD) {
     return res % M;
 }
 
-long long int mod(long long int a, long long int b) {
+/*long long int mod(long long int a, long long int b) {
     long long int ret = a % b;
     if (ret < 0)
         ret += b;
     return ret;
-}
+}*/
 
 ll highestPowerof2LessThan(ll v) {
     // check for the set bits
@@ -235,7 +239,7 @@ template <class T> class Segtree {
 
 private:
 
-    const T DEFAULT = INF/2;  // Will overflow if T is an int
+    const T DEFAULT = INF/3;  // Will overflow if T is an int
 
 
     vector<T> segtree;
@@ -265,10 +269,10 @@ public:
     }
 
 
-    /** @return the minimum element in the range [start, end) */
+    /** @return the max element in the range [start, end] */
 
     T rmin(int start, int end) {
-
+        end++;
         T sum = DEFAULT;
 
         for (start += len, end += len; start < end; start /= 2, end /= 2) {
@@ -285,7 +289,7 @@ public:
 
 };
 
-using Mint = mint<MOD>;
+using Mint = mint<MOD2>;
 
 struct fenwick { // not one-indexed
     vector<ll> a;
@@ -426,7 +430,17 @@ struct stronglyConnectedComponents {
     }
 };
 
-/* ll spf[(int) 1e6 + 10]; // cler
+bool contains(string& s1, string& s2){
+    if (s1.find(s2) != std::string::npos) {
+        return true;
+    }
+    return false;
+}
+
+const int MAXN = (int) 2e5 + 7; // change
+
+
+/*ll spf[MAXN + 10]; // cler
 void sieve(ll n) {
     for (int i = 1; i <= n; ++i)
         spf[i] = i & 1 ? i : 2;
@@ -440,38 +454,27 @@ void sieve(ll n) {
     }
 } */
 
-const int MAXN = (int) 2e5 + 7;
 
 void preload() {
-   // sieve((int) 1e6 + 3);
+
+
+
 }
 
-Mint psum[(int) 1e5 + 3];
-void solve() {
-    int n;
-    cin >> n;
-    ll a[n];
-    for (int i = 0; i < n; ++i)
-        cin >> a[i];
+void solve(int tc) {
 
-    Mint s = 0;
-    psum[0] = 0;
-    for (int i = 0; i < n; ++i)
-        psum[i+1] = psum[i] + a[i];
-    for (int i = 0; i < n; ++i){
-        s += (psum[n]-psum[i])*a[i];
-    }
-    print((s*binpow(2,n-1,MOD)).x);
 }
-
 
 int main() {
     fast_io;
     preload();
     int t;
     t = 1;
-   // cin >> t;
-    while (t-- > 0)
-        solve();
+ //   cin >> t;
+    int x = 1;
+    while (t-- > 0) {
+        solve(x);
+    }
+
     return 0;
 }
