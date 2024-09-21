@@ -6,6 +6,7 @@
 using namespace std;
 typedef long long ll;
 typedef __int128 lll;
+//typedef __float128 fl;
 typedef unsigned long long ull;
 typedef vector<int> vi;
 typedef vector<ll> vll;
@@ -22,6 +23,14 @@ const double PI = 3.14159265358979323846;
 #define fast_io ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
 #define print(a) cout << (a) << "\n";
 #define printPair(a) cout << (a).first << " " << (a).second << "\n";
+
+#define debug(...) fprintf(stderr, __VA_ARGS__), fflush(stderr)
+#define time__(d) \
+    for ( \
+        auto blockTime = make_pair(chrono::high_resolution_clock::now(), true); \
+        blockTime.second; \
+        debug("%s: %lld ms\n", d, chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - blockTime.first).count()), blockTime.second = false \
+    )
 
 template<typename T>
 void printArray(T arr[], unsigned int n) {
@@ -145,38 +154,39 @@ int fenwickQuery(int *a, int l, int r) { // assuming one-indexed array!
     return fenwickRightHandQuery(a, r) - fenwickRightHandQuery(a, l - 1);
 }
 
-template<ll mod = MOD>
-struct mint {
+//template<ll mod = MOD>
+struct Mint {
     ll x;
+    static ll mod;
 
-    mint() : x(0) {}
+    Mint() : x(0) {}
 
-    mint(ll _x) {
+    Mint(ll _x) {
         _x %= mod;
         if (_x < 0) _x += mod;
         x = _x;
     }
 
-    mint &operator+=(const mint &a) {
+    Mint &operator+=(const Mint &a) {
         x += a.x;
         if (x >= mod) x -= mod;
         return *this;
     }
 
-    mint &operator-=(const mint &a) {
+    Mint &operator-=(const Mint &a) {
         x += mod - a.x;
         if (x >= mod) x -= mod;
         return *this;
     }
 
-    mint &operator*=(const mint &a) {
+    Mint &operator*=(const Mint &a) {
         x = (ull) x * a.x % mod;
         return *this;
     }
 
-    mint pow(ll pw) const {
-        mint res = 1;
-        mint cur = *this;
+    Mint pow(ll pw) const {
+        Mint res = 1;
+        Mint cur = *this;
         while (pw) {
             if (pw & 1) res *= cur;
             cur *= cur;
@@ -185,7 +195,7 @@ struct mint {
         return res;
     }
 
-    mint inv() const {
+    Mint inv() const {
         assert(x != 0);
         ll t = x;
         ll res = 1;
@@ -197,99 +207,45 @@ struct mint {
         return res;
     }
 
-    mint &operator/=(const mint &a) {
+    Mint &operator/=(const Mint &a) {
         return *this *= a.inv();
     }
 
-    mint operator+(const mint &a) const {
-        return mint(*this) += a;
+    Mint operator+(const Mint &a) const {
+        return Mint(*this) += a;
     }
 
-    mint operator-(const mint &a) const {
-        return mint(*this) -= a;
+    Mint operator-(const Mint &a) const {
+        return Mint(*this) -= a;
     }
 
-    mint operator*(const mint &a) const {
-        return mint(*this) *= a;
+    Mint operator*(const Mint &a) const {
+        return Mint(*this) *= a;
     }
 
-    mint operator/(const mint &a) const {
-        return mint(*this) /= a;
+    Mint operator/(const Mint &a) const {
+        return Mint(*this) /= a;
     }
 
-    bool operator==(const mint &a) const {
+    bool operator==(const Mint &a) const {
         return x == a.x;
     }
 
-    bool operator!=(const mint &a) const {
+    bool operator!=(const Mint &a) const {
         return x != a.x;
     }
 
-    bool operator<(const mint &a) const {
+    bool operator<(const Mint &a) const {
         return x < a.x;
     }
 
-    friend ostream &operator<<(ostream &out, const mint &m) {
+    friend ostream &operator<<(ostream &out, const Mint &m) {
         out << m.x;
         return out;
     }
 };
 
-template <class T> class Segtree {
-
-private:
-
-    const T DEFAULT = INF/3;  // Will overflow if T is an int
-
-
-    vector<T> segtree;
-
-    int len;
-
-
-public:
-
-    Segtree(int len) : len(len), segtree(len * 2, DEFAULT) {}
-
-
-    /** Sets the value at ind to val. */
-
-    void set(int ind, T val) {
-
-        ind += len;
-
-        segtree[ind] = val;
-
-        for (; ind > 1; ind /= 2) {
-
-            segtree[ind / 2] = std::min(segtree[ind], segtree[ind ^ 1]);
-
-        }
-
-    }
-
-
-    /** @return the max element in the range [start, end] */
-
-    T rmin(int start, int end) {
-        end++;
-        T sum = DEFAULT;
-
-        for (start += len, end += len; start < end; start /= 2, end /= 2) {
-
-            if (start % 2 == 1) { sum = std::min(sum, segtree[start++]); }
-
-            if (end % 2 == 1) { sum = std::min(sum, segtree[--end]); }
-
-        }
-
-        return sum;
-
-    }
-
-};
-
-using Mint = mint<MOD2>;
+// using Mint = Mint<MOD>;
 
 struct fenwick { // not one-indexed
     vector<ll> a;
@@ -367,8 +323,8 @@ struct stronglyConnectedComponents {
     int scc = 0;
     stack<int> s;
     vi ids,low;
-    vll clumped;
     vector<bool> vis;
+    vi repr; // representative
     vector<set<int>> cond; // condensed Graph hu
     vi* adj;
     vi sz;
@@ -377,10 +333,10 @@ struct stronglyConnectedComponents {
         adj = g;
         ids = vi(n+1,-1);
         low = vi(n+1,0);
-        clumped = vll(n+1,0);
         vis = vector<bool>(n+1,false);
         cond = vector<set<int>>(n+1);
         sz = vi(n+1);
+        repr = vi(n+1);
 
         for (int i = 1; i <= n; ++i){
             if (ids[i] != -1)
@@ -393,12 +349,10 @@ struct stronglyConnectedComponents {
             for (auto c: adj[i]){
                 if (low[c] == low[i])
                     continue;
-                cond[low[i]].insert(low[c]);
+                cond[find(i)].insert(find(c));
             }
         }
     }
-
-
 
     void dfs(int v){
         s.push(v);
@@ -413,6 +367,7 @@ struct stronglyConnectedComponents {
         }
 
         if (ids[v] == low[v]){
+            repr[ids[v]] = v;
             while (!s.empty()){
                 int x = s.top();
                 s.pop();
@@ -428,6 +383,14 @@ struct stronglyConnectedComponents {
     int getSCCcnt(){
         return scc;
     }
+
+    int find(int a){
+        return repr[low[a]];
+    }
+
+    bool inSameSCC(int a, int b){
+        return find(a) == find(b);
+    }
 };
 
 bool contains(string& s1, string& s2){
@@ -437,43 +400,71 @@ bool contains(string& s1, string& s2){
     return false;
 }
 
-const int MAXN = (int) 2e5 + 7; // change
+int negMod(ll a, int b){
+    int r = a % b;
+    return r >= 0 ? r : r + std::abs(b);
+}
 
-
-/*ll spf[MAXN + 10]; // cler
-void sieve(ll n) {
-    for (int i = 1; i <= n; ++i)
-        spf[i] = i & 1 ? i : 2;
-    for (int i = 3; i * i <= n; ++i) {
-        if (spf[i] == i) {
-            for (int p = i * i; p <= n; p += i) {
-                if (spf[p] == p)
-                    spf[p] = i;
-            }
-        }
-    }
-} */
-
+ll Mint::mod = MOD;
 
 void preload() {
-
-
-
+    //sieve(MAXN);
 }
 
-void solve(int tc) {
+double TOL = 1e-8;
+const int MAXN = (int) 1e5 + 30;
 
+int MOD3 = MOD + 2;
+
+struct pair_hash {
+    std::size_t operator() (const std::pair<int, int>& p) const {
+        return std::hash<int>()(p.first) ^ (std::hash<int>()(p.second) << 1);
+    }
+};
+
+
+void solve(int& tc) {
+    int n;
+    cin >> n;
+    ll g;
+    cin >> g;
+    vll a(n);
+    for (int i = 0; i < n; ++i){
+        cin >> a[i];
+    }
+    sort(a.begin(),a.end());
+
+    int l = lower_bound(a.begin(),a.end(),g) - a.begin()-1;
+
+    int ind = 0;
+    ll ans = INF/3;
+    if (l >= 0){
+        ans = a[l];
+        ind = l;
+    }
+
+    int r = lower_bound(a.begin(),a.end(),g) - a.begin();
+    if (r < n && a[r]-g <= abs(g - ans)){
+        ans = a[r];
+        ind = r;
+    }
+
+    cout << "Case #" << tc << ": " << n-ind << " " << abs(ans-g)  << "\n";
 }
+
 
 int main() {
     fast_io;
-    preload();
     int t;
     t = 1;
- //   cin >> t;
-    int x = 1;
-    while (t-- > 0) {
-        solve(x);
+    cin >> t;
+    time__("solve") {
+        preload();
+        int x = 0;
+        while (t-- > 0) {
+            x++;
+            solve(x);
+        }
     }
 
     return 0;

@@ -1,5 +1,6 @@
 #include "testlib.h"
-const int MOD = (int) 1e9 + 7;
+
+
 int main(int argc, char* argv[]) {
     // This command initializes checker environment.
     registerTestlibCmd(argc, argv);
@@ -13,16 +14,39 @@ int main(int argc, char* argv[]) {
     // should be between -2000 and 2000. If it doesn't belong to the specified
     // range, checker finishes with verdict _pe and comment saying that [sum of numbers]
     // is outside of the specified range.
-    long long pans = ouf.readLong(0ll, MOD-1, "ans");
+    int t = inf.readInt(); // Reading number of test cases
 
-    // This function reads a single integer from the jury output. Here we suppose
-    // that jury's answer is correct and we do not need to additionally verify it.
-    long long jans = ans.readLong(); // We suppose that jury's answer is correct
+    for(int caseNo = 1; caseNo <= t; caseNo++) {
+        // Reading each test case parameters
+        int n = inf.readInt();
+        inf.readSpace();
+        int k = inf.readInt();
+        inf.readSpace();
+        int d = inf.readInt();
+        inf.readEoln();
 
-    if (pans == jans)
-        quitf(_ok, "nice OK"); // This finishes checker with verdit OK.
-    else
-        // quitf handles a comment like printf, i. e. you may use specifiers like
-        // %d, %s etc in the comment.
-        quitf(_wa, "Wrong answer, expected = %lld, found = %lld", jans, pans);
+        // Reading coefficients, note that they are not directly used in the checker
+        // but we need to read them to correctly follow the input
+        for(int i = 0; i <= d; i++) {
+            inf.readInt();
+            if (i < d) {
+                inf.readSpace(); // Reading space between coefficients
+            } else {
+                inf.readEoln(); // Reading end of line after the last coefficient
+            }
+        }
+
+        // Since the problem statement doesn't specify a range for the output integers
+        // but you might want to set a reasonable one based on the context or constraints
+        // Here, assuming the output should be a non-negative integer within a certain range
+        long long MOD = 1000000007; // Example modulus or range, adjust accordingly
+
+        long long pans = ouf.readLong(0ll, MOD-1, "participant's answer");
+        long long jans = ans.readLong(0ll, MOD-1, "jury's answer"); // Reading jury's answer
+
+        if (pans != jans)
+            quitf(_wa, "Case #%d failed: expected %lld, found %lld", caseNo, jans, pans);
+    }
+
+    quitf(_ok, "All cases passed! Nice job Snow! maybe you can defeat the moniforces...");
 }
